@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه مدیریت دامداری دامو - شناسنامه دام‌ها</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Vazirmatn', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-gray-950 font-sans text-gray-100 pb-24 md:pb-12">
+
+    <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2"><span>🐄</span> سامانه مدیریت «دامو»</h1>
+            <a href="dashboard.html" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-xl transition">📊 بازگشت به داشبورد</a>
+        </div>
+    </header>
+
+    <nav class="hidden md:block bg-gray-900 border-b border-gray-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex gap-6 text-sm font-medium">
+            <a href="dashboard.html" class="py-3.5 text-gray-400 hover:text-emerald-400">📊 داشبورد</a>
+            <a href="animals.html" class="py-3.5 border-b-2 border-emerald-500 text-emerald-400 font-bold">🔍 شناسنامه دام‌ها</a>
+            <a href="insemination.html" class="py-3.5 text-gray-400 hover:text-emerald-400">💉 ثبت تلقیح</a>
+            <a href="calving.html" class="py-3.5 text-gray-400 hover:text-emerald-400">🍼 ثبت زایش</a>
+            <a href="calendar.html" class="py-3.5 text-gray-400 hover:text-emerald-400">📅 تقویم پیش‌بینی</a>
+            <a href="financial.html" class="py-3.5 text-gray-400 hover:text-emerald-400">💰 مالی و حسابداری</a>
+            <a href="inventory.html" class="py-3.5 text-gray-400 hover:text-emerald-400">📦 انبار غذا و دارو</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+        
+        <section class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
+            <h2 id="formTitle" class="text-lg font-bold mb-4 text-emerald-400 flex items-center gap-2"><span>➕</span> ثبت دام جدید در گله</h2>
+            <form id="animalForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <input type="hidden" id="editingId" autocomplete="off">
+                
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">شماره پلاک دام <span class="text-red-400">*</span></label>
+                    <input type="text" id="tagNumber" required placeholder="مثلاً 1045" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">نژاد</label>
+                    <input type="text" id="breed" placeholder="مثلاً هلشتاین" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">جنسیت</label>
+                    <select id="gender" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-200">
+                        <option value="ماده">ماده</option>
+                        <option value="نر">نر</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">شماره گوش مادر</label>
+                    <input type="text" id="motherTag" placeholder="مثلاً 1020" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">تاریخ تولد</label>
+                    <input type="text" id="birthDate" placeholder="1404/05/12" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center text-sm font-mono text-gray-200" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">وضعیت دام</label>
+                    <select id="status" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-200">
+                        <option value="عادی">عادی</option>
+                        <option value="آبستن">آبستن</option>
+                        <option value="خشک">خشک</option>
+                        <option value="شیرده">شیرده</option>
+                        <option value="حذف‌شده">حذف‌شده (فروش/کشتار)</option>
+                        <option value="مرده">مرده (تلف‌شده)</option>
+                    </select>
+                </div>
+
+                <div class="sm:col-span-2 md:col-span-3 flex justify-end gap-2 mt-2">
+                    <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2.5 rounded-xl text-sm transition">لغو ویرایش</button>
+                    <button type="submit" id="submitBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition">💾 ثبت دام در دیتابیس</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                <h2 class="text-lg font-bold text-gray-200">📋 لیست کامل دام‌ها</h2>
+                <input type="text" id="searchInput" placeholder="جستجوی پلاک..." onkeyup="loadAnimals(this.value)" class="px-4 py-2 bg-gray-950 border border-gray-800 rounded-xl text-sm font-mono w-full sm:w-64" autocomplete="off">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-gray-950 text-gray-400 border-b border-gray-800">
+                        <tr>
+                            <th class="p-3.5">شماره پلاک</th>
+                            <th class="p-3.5">نژاد</th>
+                            <th class="p-3.5">جنسیت</th>
+                            <th class="p-3.5">پلاک مادر</th>
+                            <th class="p-3.5">تاریخ تولد</th>
+                            <th class="p-3.5">وضعیت</th>
+                            <th class="p-3.5 text-center">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="animalsTableBody" class="divide-y divide-gray-800/60 text-gray-300">
+                        <tr><td colspan="7" class="text-center py-6 text-gray-500">در حال بارگذاری...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="bg-gray-900 border-t border-gray-800 fixed bottom-0 left-0 right-0 z-50 md:hidden shadow-lg">
+        <div class="flex justify-around items-center h-16 text-xs">
+            <a href="dashboard.html" class="flex flex-col items-center text-gray-400">📊 داشبورد</a>
+            <a href="animals.html" class="flex flex-col items-center text-emerald-400 font-bold">🔍 شناسنامه</a>
+            <a href="insemination.html" class="flex flex-col items-center text-gray-400">💉 تلقیح</a>
+            <a href="calving.html" class="flex flex-col items-center text-gray-400">🐄 زایش</a>
+            <a href="financial.html" class="flex flex-col items-center text-gray-400">💰 مالی</a>
+            <a href="inventory.html" class="flex flex-col items-center text-gray-400">📦 انبار</a>
+        </div>
+    </nav>
+
+    <script>
+        const SUPABASE_URL = "https://zjxnevkuiyawlkqawcsv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeG5ldmt1aXlhd2xrcWF3Y3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDY2NDEsImV4cCI6MjEwMzY4MjY0MX0.6xdeTJuy-D6dFnSj9lhFM0-lPAoVYv72czplKdY6rs4";
+        
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadAnimals(search = '') {
+            let query = dbClient.from('animals').select('*').order('id', { ascending: false });
+            if (search) query = query.ilike('tag_number', `%${search}%`);
+            
+            const { data, error } = await query;
+            const tbody = document.getElementById('animalsTableBody');
+            
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-400">خطا: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500">دامی یافت نشد.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(a => {
+                let statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs bg-gray-800 text-gray-200">${a.status || 'عادی'}</span>`;
+                if (a.status === 'حذف‌شده') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs bg-amber-950 text-amber-300 border border-amber-800/50">حذف‌شده</span>`;
+                } else if (a.status === 'مرده') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs bg-red-950 text-red-300 border border-red-900/50">مرده</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-gray-950/50 transition">
+                        <td class="p-3.5 font-mono font-bold text-emerald-400">${a.tag_number}</td>
+                        <td class="p-3.5">${a.breed || '-'}</td>
+                        <td class="p-3.5">${a.gender || '-'}</td>
+                        <td class="p-3.5 font-mono text-gray-300">${a.mother_tag || '-'}</td>
+                        <td class="p-3.5 font-mono text-gray-300">${a.birth_date || '-'}</td>
+                        <td class="p-3.5">${statusBadge}</td>
+                        <td class="p-3.5 text-center">
+                            <button onclick="editAnimal(${a.id}, '${a.tag_number}', '${a.breed || ''}', '${a.gender}', '${a.mother_tag || ''}', '${a.birth_date || ''}', '${a.status}')" class="bg-blue-950 text-blue-300 border border-blue-800/50 hover:bg-blue-900 px-3 py-1 rounded-lg text-xs transition">ویرایش ✏️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('animalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const editingId = document.getElementById('editingId').value;
+            const tag_number = document.getElementById('tagNumber').value.trim();
+            const breed = document.getElementById('breed').value.trim();
+            const gender = document.getElementById('gender').value;
+            const mother_tag = document.getElementById('motherTag').value.trim();
+            const birth_date = document.getElementById('birthDate').value.trim();
+            const status = document.getElementById('status').value;
+
+            if (editingId) {
+                const { error } = await dbClient.from('animals').update({ tag_number, breed, gender, mother_tag, birth_date, status }).eq('id', editingId);
+                if (error) alert('خطا: ' + error.message);
+                else { alert('اطلاعات دام با موفقیت ویرایش شد!'); resetForm(); loadAnimals(); }
+            } else {
+                const { error } = await dbClient.from('animals').insert([{ tag_number, breed, gender, mother_tag, birth_date, status }]);
+                if (error) alert('خطا: ' + error.message);
+                else { alert('دام جدید ثبت شد!'); resetForm(); loadAnimals(); }
+            }
+        });
+
+        function editAnimal(id, tagNumber, breed, gender, motherTag, birthDate, status) {
+            document.getElementById('editingId').value = id;
+            document.getElementById('tagNumber').value = tagNumber;
+            document.getElementById('breed').value = breed;
+            document.getElementById('gender').value = gender;
+            document.getElementById('motherTag').value = motherTag;
+            document.getElementById('birthDate').value = birthDate;
+            document.getElementById('status').value = status || 'عادی';
+
+            document.getElementById('formTitle').innerHTML = '<span>✏️</span> ویرایش اطلاعات و وضعیت دام';
+            document.getElementById('submitBtn').innerText = 'به‌روزرسانی اطلاعات';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('animalForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('formTitle').innerHTML = '<span>➕</span> ثبت دام جدید در گله';
+            document.getElementById('submitBtn').innerText = '💾 ثبت دام در دیتابیس';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        loadAnimals();
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه مدیریت دامداری دامو - داشبورد</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- لود کردن کتابخانه رسمی Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-950 font-sans text-gray-100 pb-24 md:pb-12">
+
+    <!-- هدر سایت -->
+    <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                <span>🐄</span> سامانه مدیریت «دامو»
+            </h1>
+            <div class="flex items-center gap-3">
+                <a href="profile.html" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-xl transition font-medium flex items-center gap-1">
+                    <span>👤</span> پروفایل
+                </a>
+                <span class="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800/50 px-3 py-1.5 rounded-full font-medium">نسخه وب پیشرفته</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- منوی ناوبری دسکتاپ -->
+    <nav class="hidden md:block bg-gray-900 border-b border-gray-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex gap-6 text-sm font-medium">
+            <a href="dashboard.html" class="py-3.5 border-b-2 border-emerald-500 text-emerald-400 font-bold flex items-center gap-1.5">📊 داشبورد</a>
+            <a href="animals.html" class="py-3.5 border-b-2 border-transparent text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5">🔍 شناسنامه دام‌ها</a>
+            <a href="insemination.html" class="py-3.5 border-b-2 border-transparent text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5">💉 ثبت تلقیح</a>
+            <a href="calving.html" class="py-3.5 border-b-2 border-transparent text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5">🍼 ثبت زایش</a>
+            <a href="calendar.html" class="py-3.5 border-b-2 border-transparent text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5">📅 تقویم پیش‌بینی</a>
+            <a href="financial.html" class="py-3.5 border-b-2 border-transparent text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5">💰 مالی و حسابداری</a>
+            <a href="inventory.html" class="py-3.5 border-b-2 border-transparent text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5">📦 انبار غذا و دارو</a>
+        </div>
+    </nav>
+
+    <!-- محتوای اصلی داشبورد -->
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- وضعیت گله (داده‌های زنده) -->
+        <section>
+            <h2 class="text-lg font-bold mb-3 text-gray-200">خلاصه وضعیت گله</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">کل دام‌های ثبت‌شده</p>
+                        <h3 id="totalAnimalsCount" class="text-3xl font-black text-blue-400 mt-1">... <span class="text-sm font-normal text-gray-500">رأس</span></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-950 rounded-xl flex items-center justify-center text-2xl">🐾</div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">دام‌های آبستن (مثبت)</p>
+                        <h3 id="pregnantAnimalsCount" class="text-3xl font-black text-emerald-400 mt-1">... <span class="text-sm font-normal text-gray-500">رأس</span></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-950 rounded-xl flex items-center justify-center text-2xl">✅</div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">تلقیح‌های بلاتکلیف</p>
+                        <h3 id="pendingInseminationCount" class="text-3xl font-black text-amber-400 mt-1">... <span class="text-sm font-normal text-gray-500">رأس</span></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-950 rounded-xl flex items-center justify-center text-2xl">⏳</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- وضعیت مالی و انبار (متصل به دیتابیس) -->
+        <section>
+            <h2 class="text-lg font-bold mb-3 text-gray-200">وضعیت مالی و انبار فارم</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-xs text-gray-400">کل درآمد ماهانه</p>
+                    <h4 id="totalIncomeStat" class="text-xl font-bold text-emerald-400 mt-1">۰ <span class="text-xs font-normal">تومان</span></h4>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-xs text-gray-400">مجموع هزینه‌ها</p>
+                    <h4 id="totalExpenseStat" class="text-xl font-bold text-red-400 mt-1">۰ <span class="text-xs font-normal">تومان</span></h4>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-xs text-gray-400">موجودی انبار خوراک</p>
+                    <h4 id="feedInventoryStat" class="text-xl font-bold text-blue-400 mt-1">۰ <span class="text-xs font-normal">کیلوگرم</span></h4>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl">
+                    <p class="text-xs text-gray-400">اقلام انبار دارو</p>
+                    <h4 id="medicineInventoryStat" class="text-xl font-bold text-purple-400 mt-1">۰ <span class="text-xs font-normal">قلم</span></h4>
+                </div>
+            </div>
+        </section>
+
+        <!-- دسترسی سریع -->
+        <section>
+            <h2 class="text-lg font-bold mb-3 text-gray-200">دسترسی سریع</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="calving.html" class="bg-gradient-to-l from-purple-900 to-purple-800 border border-purple-700/50 text-white p-6 rounded-2xl shadow-md hover:shadow-lg transition flex items-center justify-between group">
+                    <div>
+                        <h3 class="text-xl font-bold">ثبت زایش جدید</h3>
+                        <p class="text-purple-200 text-sm mt-1">ثبت اطلاعات زایمان، ساعت، جنسیت و پلاک گوساله</p>
+                    </div>
+                    <span class="text-4xl group-hover:scale-110 transition">🍼</span>
+                </a>
+                <a href="insemination.html" class="bg-gradient-to-l from-teal-900 to-teal-800 border border-teal-700/50 text-white p-6 rounded-2xl shadow-md hover:shadow-lg transition flex items-center justify-between group">
+                    <div>
+                        <h3 class="text-xl font-bold">ثبت تلقیح جدید</h3>
+                        <p class="text-teal-200 text-sm mt-1">ثبت تاریخ، شماره اسپرم و نتیجه تلقیح</p>
+                    </div>
+                    <span class="text-4xl group-hover:scale-110 transition">💉</span>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- منوی پایین موبایل -->
+    <nav class="bg-gray-900 border-t border-gray-800 fixed bottom-0 left-0 right-0 z-50 md:hidden shadow-lg">
+        <div class="flex justify-around items-center h-16 text-xs">
+            <a href="dashboard.html" class="flex flex-col items-center text-emerald-400 font-bold"><span class="text-xl">📊</span>داشبورد</a>
+            <a href="animals.html" class="flex flex-col items-center text-gray-400"><span class="text-xl">🔍</span>شناسنامه</a>
+            <a href="insemination.html" class="flex flex-col items-center text-gray-400"><span class="text-xl">💉</span>تلقیح</a>
+            <a href="calving.html" class="flex flex-col items-center text-gray-400"><span class="text-xl">🐄</span>زایش</a>
+            <a href="financial.html" class="flex flex-col items-center text-gray-400"><span class="text-xl">💰</span>مالی</a>
+            <a href="inventory.html" class="flex flex-col items-center text-gray-400"><span class="text-xl">📦</span>انبار</a>
+        </div>
+    </nav>
+
+    <!-- اسکریپت ایمن اتصال و دریافت آمار زنده از Supabase -->
+    <script>
+        const SUPABASE_URL = "https://zjxnevkuiyawlkqawcsv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeG5ldmt1aXlhd2xrcWF3Y3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDY2NDEsImV4cCI6MjEwMzY4MjY0MX0.6xdeTJuy-D6dFnSj9lhFM0-lPAoVYv72czplKdY6rs4";
+        
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function fetchDashboardStats() {
+            try {
+                // ۱. تعداد کل دام‌ها
+                const { count: totalAnimals } = await dbClient
+                    .from('animals')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('totalAnimalsCount').innerHTML = `${totalAnimals || 0} <span class="text-sm font-normal text-gray-500">رأس</span>`;
+
+                // ۲. دام‌های آبستن (مثبت)
+                const { count: pregnantAnimals } = await dbClient
+                    .from('inseminations')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('result', 'مثبت');
+                document.getElementById('pregnantAnimalsCount').innerHTML = `${pregnantAnimals || 0} <span class="text-sm font-normal text-gray-500">رأس</span>`;
+
+                // ۳. تلقیح‌های بلاتکلیف
+                const { count: pendingInseminations } = await dbClient
+                    .from('inseminations')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('result', 'هنوز معلوم نیست');
+                document.getElementById('pendingInseminationCount').innerHTML = `${pendingInseminations || 0} <span class="text-sm font-normal text-gray-500">رأس</span>`;
+
+                // ۴. محاسبه مالی (درآمدها و هزینه‌ها از جدول financials)
+                const { data: finData } = await dbClient.from('financials').select('type, amount');
+                let totalInc = 0;
+                let totalExp = 0;
+                if (finData) {
+                    finData.forEach(item => {
+                        let amt = Number(item.amount) || 0;
+                        if (item.type === 'درآمد') totalInc += amt;
+                        else if (item.type === 'هزینه') totalExp += amt;
+                    });
+                }
+                document.getElementById('totalIncomeStat').innerHTML = `${totalInc.toLocaleString()} <span class="text-xs font-normal">تومان</span>`;
+                document.getElementById('totalExpenseStat').innerHTML = `${totalExp.toLocaleString()} <span class="text-xs font-normal">تومان</span>`;
+
+                // ۵. محاسبه موجودی انبار (خوراک و دارو از جدول inventory)
+                const { data: invData } = await dbClient.from('inventory').select('category, quantity');
+                let totalFeedQty = 0;
+                let medicineCount = 0;
+                if (invData) {
+                    invData.forEach(item => {
+                        let qty = Number(item.quantity) || 0;
+                        if (item.category === 'خوراک و علوفه') {
+                            totalFeedQty += qty;
+                        } else if (item.category === 'دارو و واکسن') {
+                            medicineCount += 1; // تعداد اقلام دارویی
+                        }
+                    });
+                }
+                document.getElementById('feedInventoryStat').innerHTML = `${totalFeedQty.toLocaleString()} <span class="text-xs font-normal">کیلوگرم</span>`;
+                document.getElementById('medicineInventoryStat').innerHTML = `${medicineCount.toLocaleString()} <span class="text-xs font-normal">قلم</span>`;
+
+            } catch (err) {
+                console.error('خطا در دریافت آمار زنده:', err);
+            }
+        }
+
+        fetchDashboardStats();
+    </script>
+</body>
+</html>

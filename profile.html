@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه مدیریت دامداری دامو - پروفایل کاربری</title>
+    <!-- فونت وزیرمتن -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- کتابخانه رسمی Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-950 font-sans text-gray-100 min-h-screen flex flex-col items-center p-4">
+
+    <!-- کانتینر اصلی پروفایل -->
+    <div class="w-full max-w-lg bg-gray-900 border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative mt-10">
+        
+        <!-- هدر پروفایل -->
+        <div class="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-emerald-950 border border-emerald-800/50 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
+                    👤
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-emerald-400">پروفایل کاربری فارم</h1>
+                    <p class="text-xs text-gray-400">مدیریت اطلاعات حساب و دامداری</p>
+                </div>
+            </div>
+            <a href="dashboard.html" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-bold transition">
+                بازگشت به داشبورد ↩
+            </a>
+        </div>
+
+        <!-- فرم اطلاعات پروفایل -->
+        <form id="profileForm" class="space-y-4" autocomplete="off">
+            <div>
+                <label class="block text-xs font-medium text-gray-300 mb-1.5">نام و نام خانوادگی مدیر</label>
+                <input type="text" id="profileName" required autocomplete="off" class="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-100 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-300 mb-1.5">نام دامداری / فارم</label>
+                <input type="text" id="profileFarmName" required autocomplete="off" class="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-100 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-300 mb-1.5">شماره موبایل (غیرقابل تغییر)</label>
+                <input type="tel" id="profilePhone" disabled class="w-full px-4 py-3 bg-gray-950/50 border border-gray-800 rounded-xl text-sm text-gray-500 font-mono cursor-not-allowed">
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-300 mb-1.5">ایمیل</label>
+                <input type="email" id="profileEmail" required autocomplete="off" class="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-100 transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-300 mb-1.5">رمز عبور جدید (در صورت تمایل به تغییر)</label>
+                <input type="password" id="profilePassword" autocomplete="new-password" placeholder="خالی بگذارید تا تغییر نکند" class="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-100 transition">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm mt-4">
+                <span>💾</span> ذخیره تغییرات پروفایل
+            </button>
+        </form>
+
+        <!-- دکمه خروج از حساب -->
+        <div class="mt-6 pt-6 border-t border-gray-800 text-center">
+            <button onclick="logout()" class="text-red-400 hover:text-red-300 text-xs font-bold transition">
+                🚪 خروج از حساب کاربری
+            </button>
+        </div>
+
+    </div>
+
+    <!-- اسکریپت بارگذاری و به‌روزرسانی اطلاعات پروفایل -->
+    <script>
+        const SUPABASE_URL = "https://zjxnevkuiyawlkqawcsv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeG5ldmt1aXlhd2xrcWF3Y3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDY2NDEsImV4cCI6MjEwMzY4MjY0MX0.6xdeTJuy-D6dFnSj9lhFM0-lPAoVYv72czplKdY6rs4";
+        
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const currentPhone = localStorage.getItem('damou_logged_user_phone');
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!currentPhone) {
+                alert('لطفاً ابتدا وارد حساب کاربری خود شوید.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data, error } = await dbClient
+                .from('farms')
+                .select('*')
+                .eq('phone', currentPhone)
+                .single();
+
+            if (error || !data) {
+                alert('خطا در دریافت اطلاعات پروفایل.');
+                return;
+            }
+
+            document.getElementById('profileName').value = data.manager_name || '';
+            document.getElementById('profileFarmName').value = data.farm_name || '';
+            document.getElementById('profilePhone').value = data.phone || '';
+            document.getElementById('profileEmail').value = data.email || '';
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const manager_name = document.getElementById('profileName').value.trim();
+            const farm_name = document.getElementById('profileFarmName').value.trim();
+            const email = document.getElementById('profileEmail').value.trim();
+            const newPassword = document.getElementById('profilePassword').value.trim();
+
+            let updateData = { manager_name, farm_name, email };
+            if (newPassword) {
+                updateData.password_hash = newPassword;
+            }
+
+            const { error } = await dbClient
+                .from('farms')
+                .update(updateData)
+                .eq('phone', currentPhone);
+
+            if (error) {
+                alert('خطا در به‌روزرسانی اطلاعات: ' + error.message);
+            } else {
+                alert('اطلاعات پروفایل و رمز عبور با موفقیت به‌روزرسانی شد!');
+                document.getElementById('profilePassword').value = '';
+            }
+        });
+
+        // هدایت صحیح به صفحه ورود (index.html) هنگام خروج
+        function logout() {
+            localStorage.removeItem('damou_logged_user_phone');
+            localStorage.removeItem('damou_is_admin');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

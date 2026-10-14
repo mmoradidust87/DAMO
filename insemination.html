@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه مدیریت دامداری دامو - ثبت تلقیح جدید</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Vazirmatn', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-gray-950 font-sans text-gray-100 pb-24 md:pb-12">
+
+    <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-teal-400 flex items-center gap-2"><span>💉</span> ثبت و مدیریت تلقیح‌ها</h1>
+            <a href="dashboard.html" class="text-sm bg-gray-800 text-gray-300 px-3 py-1.5 rounded-xl border border-gray-700">← داشبورد</a>
+        </div>
+    </header>
+
+    <nav class="hidden md:block bg-gray-900 border-b border-gray-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex gap-6 text-sm font-medium">
+            <a href="dashboard.html" class="py-3.5 text-gray-400 hover:text-teal-400">📊 داشبورد</a>
+            <a href="animals.html" class="py-3.5 text-gray-400 hover:text-teal-400">🔍 شناسنامه دام‌ها</a>
+            <a href="insemination.html" class="py-3.5 border-b-2 border-teal-500 text-teal-400 font-bold">💉 ثبت تلقیح</a>
+            <a href="calving.html" class="py-3.5 text-gray-400 hover:text-teal-400">🍼 ثبت زایش</a>
+            <a href="calendar.html" class="py-3.5 text-gray-400 hover:text-teal-400">📅 تقویم پیش‌بینی</a>
+            <a href="financial.html" class="py-3.5 text-gray-400 hover:text-teal-400">💰 مالی و حسابداری</a>
+            <a href="inventory.html" class="py-3.5 text-gray-400 hover:text-teal-400">📦 انبار غذا و دارو</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+        
+        <section class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
+            <h2 id="insFormTitle" class="text-lg font-bold mb-4 text-teal-400 flex items-center gap-2"><span>💉</span> ثبت رکورد تلقیح جدید</h2>
+            <form id="inseminationForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <input type="hidden" id="editingId" autocomplete="off">
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">شماره پلاک دام <span class="text-red-400">*</span></label>
+                    <input type="text" id="tagNumber" required placeholder="مثلاً 1045" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm font-mono" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">شماره یا کد اسپرم <span class="text-red-400">*</span></label>
+                    <input type="text" id="semenCode" required placeholder="مثلاً SP-992" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm font-mono" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">تاریخ تلقیح <span class="text-red-400">*</span></label>
+                    <input type="text" id="inseminationDate" value="1405/07/19" required class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm text-center font-mono text-gray-200" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">نوبت تلقیح</label>
+                    <select id="attemptNumber" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm text-gray-200">
+                        <option value="نوبت اول">نوبت اول</option>
+                        <option value="نوبت دوم">نوبت دوم</option>
+                        <option value="نوبت سوم یا بیشتر">نوبت سوم یا بیشتر</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">نتیجه تلقیح</label>
+                    <select id="result" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm text-gray-200">
+                        <option value="هنوز معلوم نیست">🟡 هنوز معلوم نیست (بلاتکلیف)</option>
+                        <option value="مثبت">🟢 مثبت (آبستن)</option>
+                        <option value="منفی">🔴 منفی</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">توضیحات</label>
+                    <input type="text" id="description" placeholder="نکات تکمیلی..." class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none text-sm text-gray-200" autocomplete="off">
+                </div>
+
+                <div class="sm:col-span-2 md:col-span-3 flex justify-end gap-2 mt-2">
+                    <button type="button" id="cancelEditBtn" onclick="resetInsForm()" class="hidden bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2.5 rounded-xl text-sm transition">لغو ویرایش</button>
+                    <button type="submit" id="submitBtn" class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg transition text-sm">💾 ثبت رکورد تلقیح در دیتابیس</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                <h2 class="text-lg font-bold text-gray-200">📋 لیست تلقیح‌های ثبت‌شده</h2>
+                <input type="text" id="searchInsemination" placeholder="جستجوی پلاک یا کد اسپرم..." onkeyup="loadInseminations(this.value)" class="px-4 py-2 bg-gray-950 border border-gray-800 rounded-xl text-sm font-mono w-full sm:w-64" autocomplete="off">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-gray-950 text-gray-400 border-b border-gray-800">
+                        <tr>
+                            <th class="p-3.5">شماره پلاک دام</th>
+                            <th class="p-3.5">کد اسپرم</th>
+                            <th class="p-3.5">تاریخ تلقیح</th>
+                            <th class="p-3.5">نوبت</th>
+                            <th class="p-3.5">نتیجه</th>
+                            <th class="p-3.5">توضیحات</th>
+                            <th class="p-3.5 text-center rounded-l-xl">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="insTableBody" class="divide-y divide-gray-800/60 text-gray-300">
+                        <tr><td colspan="7" class="text-center py-6 text-gray-500">در حال دریافت اطلاعات از دیتابیس...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="bg-gray-900 border-t border-gray-800 fixed bottom-0 left-0 right-0 z-50 md:hidden shadow-lg">
+        <div class="flex justify-around items-center h-16 text-xs">
+            <a href="dashboard.html" class="flex flex-col items-center text-gray-400">📊 داشبورد</a>
+            <a href="animals.html" class="flex flex-col items-center text-gray-400">🔍 شناسنامه</a>
+            <a href="insemination.html" class="flex flex-col items-center text-teal-400 font-bold">💉 تلقیح</a>
+            <a href="calving.html" class="flex flex-col items-center text-gray-400">🐄 زایش</a>
+            <a href="financial.html" class="flex flex-col items-center text-gray-400">💰 مالی</a>
+            <a href="inventory.html" class="flex flex-col items-center text-gray-400">📦 انبار</a>
+        </div>
+    </nav>
+
+    <script>
+        const SUPABASE_URL = "https://zjxnevkuiyawlkqawcsv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeG5ldmt1aXlhd2xrcWF3Y3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDY2NDEsImV4cCI6MjEwMzY4MjY0MX0.6xdeTJuy-D6dFnSj9lhFM0-lPAoVYv72czplKdY6rs4";
+        
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadInseminations(search = '') {
+            let query = dbClient.from('inseminations').select('*').order('id', { ascending: false });
+            if (search) query = query.or(`tag_number.ilike.%${search}%,semen_code.ilike.%${search}%`);
+
+            const { data, error } = await query;
+            const tableBody = document.getElementById('insTableBody');
+
+            if (error) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-400">خطا: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-500">هیچ رکورد تلقیحی ثبت نشده است.</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = data.map(item => {
+                let res = item.result || 'هنوز معلوم نیست';
+                let resultBadge = '<span class="px-2.5 py-1 rounded-lg text-xs bg-yellow-950 text-yellow-300 border border-yellow-800/50">هنوز معلوم نیست</span>';
+                if (res === 'مثبت') {
+                    resultBadge = '<span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-950 text-emerald-300 border border-emerald-800/50">مثبت</span>';
+                } else if (res === 'منفی') {
+                    resultBadge = '<span class="px-2.5 py-1 rounded-lg text-xs bg-red-950 text-red-300 border border-red-900/50">منفی</span>';
+                }
+
+                return `
+                    <tr class="hover:bg-gray-950/50 transition">
+                        <td class="p-3.5 font-mono font-bold text-teal-400">${item.tag_number || '-'}</td>
+                        <td class="p-3.5 font-mono">${item.semen_code || '-'}</td>
+                        <td class="p-3.5 font-mono">${item.insemination_date || '-'}</td>
+                        <td class="p-3.5">${item.attempt_number || '-'}</td>
+                        <td class="p-3.5">${resultBadge}</td>
+                        <td class="p-3.5 text-gray-400 text-xs">${item.description || '-'}</td>
+                        <td class="p-3.5 text-center">
+                            <button onclick="editInsemination(${item.id}, '${item.tag_number || ''}', '${item.semen_code || ''}', '${item.insemination_date || ''}', '${item.attempt_number || ''}', '${item.result || ''}', '${item.description || ''}')" class="bg-blue-950 text-blue-300 border border-blue-800/50 hover:bg-blue-900 px-3 py-1 rounded-lg text-xs transition">ویرایش ✏️</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('inseminationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editingId').value;
+            const tag_number = document.getElementById('tagNumber').value.trim();
+            const semen_code = document.getElementById('semenCode').value.trim();
+            const insemination_date = document.getElementById('inseminationDate').value.trim();
+            const attempt_number = document.getElementById('attemptNumber').value;
+            const result = document.getElementById('result').value;
+            const description = document.getElementById('description').value.trim();
+
+            if (editingId) {
+                const { error } = await dbClient.from('inseminations').update({ tag_number, semen_code, insemination_date, attempt_number, result, description }).eq('id', editingId);
+                if (error) alert('خطا در ویرایش: ' + error.message);
+                else { alert('رکورد تلقیح ویرایش شد!'); resetInsForm(); loadInseminations(); }
+            } else {
+                const { error } = await dbClient.from('inseminations').insert([{ tag_number, semen_code, insemination_date, attempt_number, result, description }]);
+                if (error) alert('خطا در ثبت: ' + error.message);
+                else { alert('رکورد تلقیح ثبت شد!'); resetInsForm(); loadInseminations(); }
+            }
+        });
+
+        function editInsemination(id, tagNumber, semenCode, insDate, attemptNumber, result, desc) {
+            document.getElementById('editingId').value = id;
+            document.getElementById('tagNumber').value = tagNumber;
+            document.getElementById('semenCode').value = semenCode;
+            document.getElementById('inseminationDate').value = insDate;
+            document.getElementById('attemptNumber').value = attemptNumber || 'نوبت اول';
+            document.getElementById('result').value = result || 'هنوز معلوم نیست';
+            document.getElementById('description').value = desc;
+
+            document.getElementById('insFormTitle').innerHTML = '<span>✏️</span> ویرایش اطلاعات تلقیح';
+            document.getElementById('submitBtn').innerText = 'به‌روزرسانی تلقیح';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetInsForm() {
+            document.getElementById('inseminationForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('insFormTitle').innerHTML = '<span>💉</span> ثبت رکورد تلقیح جدید';
+            document.getElementById('submitBtn').innerText = '💾 ثبت رکورد تلقیح در دیتابیس';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        loadInseminations();
+    </script>
+</body>
+</html>

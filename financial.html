@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه مدیریت دامداری دامو - مالی و حسابداری</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Vazirmatn', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-gray-950 font-sans text-gray-100 pb-24 md:pb-12">
+
+    <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2"><span>💰</span> مدیریت مالی و حسابداری فارم</h1>
+            <a href="dashboard.html" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-xl transition">📊 بازگشت به داشبورد</a>
+        </div>
+    </header>
+
+    <nav class="hidden md:block bg-gray-900 border-b border-gray-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex gap-6 text-sm font-medium">
+            <a href="dashboard.html" class="py-3.5 text-gray-400 hover:text-emerald-400">📊 داشبورد</a>
+            <a href="animals.html" class="py-3.5 text-gray-400 hover:text-emerald-400">🔍 شناسنامه دام‌ها</a>
+            <a href="insemination.html" class="py-3.5 text-gray-400 hover:text-emerald-400">💉 ثبت تلقیح</a>
+            <a href="calving.html" class="py-3.5 text-gray-400 hover:text-emerald-400">🍼 ثبت زایش</a>
+            <a href="calendar.html" class="py-3.5 text-gray-400 hover:text-emerald-400">📅 تقویم پیش‌بینی</a>
+            <a href="financial.html" class="py-3.5 border-b-2 border-emerald-500 text-emerald-400 font-bold">💰 مالی و حسابداری</a>
+            <a href="inventory.html" class="py-3.5 text-gray-400 hover:text-emerald-400">📦 انبار غذا و دارو</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+        
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-400">مجموع کل درآمدها</p>
+                    <h3 id="totalIncome" class="text-2xl font-black text-emerald-400 mt-1">۰ <span class="text-xs font-normal text-gray-500">تومان</span></h3>
+                </div>
+                <div class="w-12 h-12 bg-emerald-950 rounded-xl flex items-center justify-center text-2xl">📈</div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-400">مجموع کل هزینه‌ها</p>
+                    <h3 id="totalExpense" class="text-2xl font-black text-red-400 mt-1">۰ <span class="text-xs font-normal text-gray-500">تومان</span></h3>
+                </div>
+                <div class="w-12 h-12 bg-red-950 rounded-xl flex items-center justify-center text-2xl">📉</div>
+            </div>
+            <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-400">سود / زیان خالص فارم</p>
+                    <h3 id="netProfit" class="text-2xl font-black text-blue-400 mt-1">۰ <span class="text-xs font-normal text-gray-500">تومان</span></h3>
+                </div>
+                <div class="w-12 h-12 bg-blue-950 rounded-xl flex items-center justify-center text-2xl">💎</div>
+            </div>
+        </section>
+
+        <section class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
+            <h2 id="finFormTitle" class="text-lg font-bold mb-4 text-emerald-400 flex items-center gap-2"><span>➕</span> ثبت تراکنش مالی جدید</h2>
+            
+            <form id="financialForm" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <input type="hidden" id="editingId" autocomplete="off">
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">نوع تراکنش</label>
+                    <select id="type" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-200">
+                        <option value="درآمد">درآمد (فروش شیر، گوساله و...)</option>
+                        <option value="هزینه">هزینه (خوراک، دارو، حقوق و...)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">مبلغ (تومان) <span class="text-red-400">*</span></label>
+                    <input type="number" id="amount" required placeholder="مثلاً 1500000" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono text-gray-200" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">تاریخ تراکنش</label>
+                    <input type="text" id="txDate" value="1405/07/19" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-center text-sm font-mono text-gray-200" autocomplete="off">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">عنوان / بابت</label>
+                    <input type="text" id="title" required placeholder="مثلاً خرید کنسانتره" class="w-full px-4 py-2.5 bg-gray-950 border border-gray-800 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-200" autocomplete="off">
+                </div>
+
+                <div class="md:col-span-4 flex justify-end gap-2">
+                    <button type="button" id="cancelEditBtn" onclick="resetFinForm()" class="hidden bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2.5 rounded-xl text-sm transition">لغو ویرایش</button>
+                    <button type="submit" id="submitBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition flex items-center gap-2">
+                        <span>💾</span> ثبت تراکنش در دیتابیس
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                <h2 class="text-lg font-bold text-gray-200">📋 سوابق مالی و تراکنش‌ها</h2>
+                <input type="text" id="searchFinancial" placeholder="جستجوی بابت تراکنش..." onkeyup="loadFinancials(this.value)" class="px-4 py-2 bg-gray-950 border border-gray-800 rounded-xl text-sm w-full sm:w-64">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-gray-950 text-gray-400 border-b border-gray-800">
+                        <tr>
+                            <th class="p-3.5">نوع</th>
+                            <th class="p-3.5">عنوان بابت</th>
+                            <th class="p-3.5">مبلغ (تومان)</th>
+                            <th class="p-3.5">تاریخ</th>
+                            <th class="p-3.5 text-center rounded-l-xl">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="financialTableBody" class="divide-y divide-gray-800/60 text-gray-300">
+                        <tr><td colspan="5" class="text-center py-6 text-gray-500">در حال دریافت اطلاعات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="bg-gray-900 border-t border-gray-800 fixed bottom-0 left-0 right-0 z-50 md:hidden shadow-lg">
+        <div class="flex justify-around items-center h-16 text-xs">
+            <a href="dashboard.html" class="flex flex-col items-center text-gray-400">📊 داشبورد</a>
+            <a href="animals.html" class="flex flex-col items-center text-gray-400">🔍 شناسنامه</a>
+            <a href="insemination.html" class="flex flex-col items-center text-gray-400">💉 تلقیح</a>
+            <a href="calving.html" class="flex flex-col items-center text-gray-400">🐄 زایش</a>
+            <a href="financial.html" class="flex flex-col items-center text-emerald-400 font-bold">💰 مالی</a>
+            <a href="inventory.html" class="flex flex-col items-center text-gray-400">📦 انبار</a>
+        </div>
+    </nav>
+
+    <script>
+        const SUPABASE_URL = "https://zjxnevkuiyawlkqawcsv.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeG5ldmt1aXlhd2xrcWF3Y3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMDY2NDEsImV4cCI6MjEwMzY4MjY0MX0.6xdeTJuy-D6dFnSj9lhFM0-lPAoVYv72czplKdY6rs4";
+        
+        const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadFinancials(search = '') {
+            let query = dbClient.from('financials').select('*').order('id', { ascending: false });
+            if (search) query = query.ilike('title', `%${search}%`);
+
+            const { data, error } = await query;
+            const tableBody = document.getElementById('financialTableBody');
+
+            if (error) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-400">خطا: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500">هیچ تراکنشی یافت نشد.</td></tr>`;
+                document.getElementById('totalIncome').innerText = '۰ تومان';
+                document.getElementById('totalExpense').innerText = '۰ تومان';
+                document.getElementById('netProfit').innerText = '۰ تومان';
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            let sumIncome = 0;
+            let sumExpense = 0;
+
+            data.forEach(tx => {
+                const amount = Number(tx.amount) || 0;
+                if (tx.type === 'درآمد') sumIncome += amount;
+                else sumExpense += amount;
+
+                let typeBadge = tx.type === 'درآمد' 
+                    ? '<span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-950 text-emerald-300 border border-emerald-800/50">درآمد</span>'
+                    : '<span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-red-950 text-red-300 border border-red-800/50">هزینه</span>';
+
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-gray-950/50 transition">
+                        <td class="p-3.5">${typeBadge}</td>
+                        <td class="p-3.5 font-medium">${tx.title || '-'}</td>
+                        <td class="p-3.5 font-mono font-bold ${tx.type === 'درآمد' ? 'text-emerald-400' : 'text-red-400'}">${amount.toLocaleString()}</td>
+                        <td class="p-3.5 font-mono text-gray-400">${tx.tx_date || '-'}</td>
+                        <td class="p-3.5 text-center">
+                            <button onclick="editFinancial(${tx.id}, '${tx.type}', ${tx.amount}, '${tx.tx_date || ''}', '${tx.title || ''}')" class="bg-blue-950 text-blue-300 border border-blue-800/50 hover:bg-blue-900 px-3 py-1 rounded-lg text-xs transition">ویرایش ✏️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            let net = sumIncome - sumExpense;
+            document.getElementById('totalIncome').innerHTML = `${sumIncome.toLocaleString()} <span class="text-xs font-normal text-gray-500">تومان</span>`;
+            document.getElementById('totalExpense').innerHTML = `${sumExpense.toLocaleString()} <span class="text-xs font-normal text-gray-500">تومان</span>`;
+            
+            const netEl = document.getElementById('netProfit');
+            netEl.innerHTML = `${net.toLocaleString()} <span class="text-xs font-normal text-gray-500">تومان</span>`;
+            netEl.className = `text-2xl font-black mt-1 ${net >= 0 ? 'text-blue-400' : 'text-red-400'}`;
+        }
+
+        document.getElementById('financialForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editingId').value;
+            const type = document.getElementById('type').value;
+            const amount = document.getElementById('amount').value;
+            const tx_date = document.getElementById('txDate').value.trim();
+            const title = document.getElementById('title').value.trim();
+
+            if (editingId) {
+                const { error } = await dbClient.from('financials').update({ type, amount, tx_date, title }).eq('id', editingId);
+                if (error) alert('خطا: ' + error.message);
+                else { alert('تراکنش مالی ویرایش شد!'); resetFinForm(); loadFinancials(); }
+            } else {
+                const { error } = await dbClient.from('financials').insert([{ type, amount, tx_date, title }]);
+                if (error) alert('خطا: ' + error.message);
+                else { alert('تراکنش مالی ثبت شد!'); resetFinForm(); loadFinancials(); }
+            }
+        });
+
+        function editFinancial(id, type, amount, txDate, title) {
+            document.getElementById('editingId').value = id;
+            document.getElementById('type').value = type;
+            document.getElementById('amount').value = amount;
+            document.getElementById('txDate').value = txDate;
+            document.getElementById('title').value = title;
+
+            document.getElementById('finFormTitle').innerHTML = '<span>✏️</span> ویرایش تراکنش مالی';
+            document.getElementById('submitBtn').innerText = 'به‌روزرسانی تراکنش';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetFinForm() {
+            document.getElementById('financialForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('finFormTitle').innerHTML = '<span>➕</span> ثبت تراکنش مالی جدید';
+            document.getElementById('submitBtn').innerHTML = '<span>💾</span> ثبت تراکنش در دیتابیس';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        loadFinancials();
+    </script>
+</body>
+</html>
